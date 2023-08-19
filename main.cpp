@@ -30,6 +30,7 @@ void* hGTASA;
 //////      Variables
 ////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////
+#define DARKTIME_START 19
 CHeli **Helis;
 uint8_t *ms_nGameClockHours;
 uint32_t *NumberOfSearchLights;
@@ -67,7 +68,7 @@ DECL_HOOK(CHeli*, GenerateHeli, CPed* pTargetPed, bool bNewsHeli)
     if(self->m_nModelIndex == 497)
     {
         sautils->LoadModelId(280);
-        self->m_pDriver = sautils->CreatePed(PED_TYPE_COP, 280, self, -1);
+        self->m_pDriver = sautils->CreatePed(PED_TYPE_COP, 280, self);
         self->m_pPassenger[0] = sautils->CreatePed(PED_TYPE_COP, 280, self, 0);
         sautils->MarkModelAsNotNeeded(280);
     }
@@ -87,9 +88,10 @@ DECL_HOOK(CHeli*, GenerateHeli, CPed* pTargetPed, bool bNewsHeli)
 }
 DECL_HOOKv(UpdateHelis)
 {
-    if(*NumberOfSearchLights > 0 && (*ms_nGameClockHours > 21 || *ms_nGameClockHours < 6))
+    if(*NumberOfSearchLights > 0)
     {
-        *NumberOfSearchLights = 0;
+        int hour = *ms_nGameClockHours; 
+        if(hour > 6 && hour < DARKTIME_START) *NumberOfSearchLights = 0;
     }
 
     UpdateHelis();
@@ -119,9 +121,9 @@ extern "C" void OnAllModsLoaded()
     HOOKPLT(UpdateHelis, pGTASA + BYVER(0x66EBEC, 0x83E370));
     #ifdef AML32
     HOOKPLT(GenerateHeli, pGTASA + 0x675120);
-    aml->Write16(pGTASA + 0x57284A, MOV2Bits::Create(21, 0));
+    aml->Write16(pGTASA + 0x57284A, MOV2Bits::Create(DARKTIME_START, 0));
     #else
     HOOK(GenerateHeli, aml->GetSym(hGTASA, "_ZN5CHeli12GenerateHeliEP4CPedb"));
-    aml->Write32(pGTASA + 0x694FB4, MOVBits::Create(21, 0, false));
+    aml->Write32(pGTASA + 0x694FB4, MOVBits::Create(DARKTIME_START, 0, false));
     #endif
 }
