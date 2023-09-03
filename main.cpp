@@ -15,7 +15,7 @@
 #endif
 #define sizeofA(__aVar)  ((int)(sizeof(__aVar)/sizeof(__aVar[0])))
 
-MYMOD(net.usergrinch.rusjj.helifix, HeliFixSA, 1.0, Grinch_ & RusJJ)
+MYMOD(net.usergrinch.rusjj.helifix, HeliFixSA, 1.1, Grinch_ & RusJJ)
 BEGIN_DEPLIST()
     ADD_DEPENDENCY_VER(net.rusjj.aml, 1.0.2.2)
     ADD_DEPENDENCY_VER(net.rusjj.gtasa.utils, 1.6)
@@ -42,7 +42,7 @@ uint32_t *NumberOfSearchLights;
 ////////////////////////////////////////////////////////////////////////////////////////
 inline void SetupHeliCrash(CHeli*& heli)
 {
-    if(!heli) return;
+    if(!heli || !heli->vehicleFlags.bCanBeDamaged || heli->m_nCreateBy != PERMANENT_VEHICLE) return;
     CPed *pDriver = heli->m_pDriver;
     if(!pDriver || !pDriver->IsAlive())
     {
